@@ -1,0 +1,221 @@
+<html>
+<link href="css/no-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.js"></script>
+<script src="js/json2.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/backbone-min.js"></script>
+
+<style type="text/css" media="screen">
+body {
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.toplevel {
+  width: 700px;
+}
+.slider-container {
+  clear: both;
+}
+.subsplit-hider {
+  position: relative;
+  background: #eee;
+  border-radius: 3px;
+  border: 1px solid #CCC;
+  box-shadow: inset 0 1px 3px #ccc;
+  float: right;
+  width: 552px;
+  padding: 0px 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  filter: Alpha(Opacity=0);
+}
+.subsplit .slider-container {
+  float: right;
+  clear: both;
+  height: 20px;
+  margin: 10px auto;
+}
+.slider-logo {
+  float: left;
+  text-align: left;
+  width: 130px;
+  padding-left: 35px;
+  line-height: 21px;
+  height: 21px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.slider-holder {
+  height: 6px;
+  position: relative;
+  background: url(slider-bg.png) no-repeat;
+  width: 292px;
+  float: left;
+  margin: 0 20px 0 18px;
+  top: 7px;
+}
+.subsplit .slider-holder {
+  width: 176px;
+}
+.slider-holder .right {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: url(slider-bg.png) no-repeat right;
+}
+.ui-slider {
+  height: 10px;
+}
+.ui-slider-handle {
+  background: url(slider-handle.png) no-repeat;
+  height: 12px;
+  width: 11px;
+  position: absolute;
+  margin-left: -6px;
+  z-index: 10;
+  top: -3px;
+}
+.editable-amount-holder {
+  left: 300px;
+  float: left;
+}
+.disclosure-triangle {
+  background:  url('disclosure-collapsed.png') 0px 0px no-repeat;
+  width:20px;
+  height:20px;
+  float:left;
+  cursor:pointer;
+  -webkit-transition:-webkit-transform ease-in-out .1s;
+  -moz-transition:-moz-transform ease-in-out .1s;
+  -ms-transition:-ms-transform ease-in-out .1s;
+  -o-transition:-o-transform ease-in-out .1s;
+}
+.subsplit-expanded {
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+}
+.no-transform .subsplit-expanded {
+  background:url('disclosure-expanded.png') 0px 0px no-repeat;
+}
+</style>
+
+<script type="text/template" id="humble-sliders-template">
+  <div class='humble-sliders'>
+    <div class='master-amount-holder'>
+      <input name="master-amount" class="master-amount" type="text" value="<%= initial_value %>" style="display:none"></input>
+    </div>
+    <div class='splits-holder'></div>
+  </div>
+</script>
+
+<script type="text/template" id='subsplit-holder-template'>
+<div class="subsplit">
+  <div class="subsplit-hider" style="display:none">
+    <div class='subsplit-wrapper'></div>
+  </div>
+</div>
+</script>
+
+<script type="text/template" id="single-slider-holder-template">
+<div class="slider-container">
+  <div class="slider-logo">
+  <% if (has_children) { %>
+    <div class="disclosure-triangle"></div>
+  <% } %>
+    <div class="slider-name"><%= split_human_name %></div>
+  </div>
+  <div class="slider-holder">
+    <div class="right"></div>
+    <div class="slider-placeholder ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"></div>
+  </div>
+  <div class="editable-amount-holder">
+    <input type="text" class="slider-amount super-slider">
+  </div>
+</div>
+</script>
+
+<script src="humble-sliders.js"></script>
+
+<script type='text/javascript'>
+$(function(){
+  window.dbg1 = humbleSliders(
+    25, /* default price in dollars */
+    $('#sliders-holder'), /* container to append the sliders into */
+    {
+      "order": [{
+          "class": "developers",
+          "subsplit": [{
+              "sibling_split": 0.16666600000000001,
+              "class": "company1",
+              "name": "Product 1"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company2",
+              "name": "Product 2"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company3",
+              "name": "Product 3"
+          }, {
+              "sibling_split": 0.16666600000000001,
+              "class": "company4",
+              "name": "Product 4"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company5",
+              "name": "Product 5"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company6",
+              "name": "Product 6",
+          }],
+          "name": "Developers"
+      }, {
+          "class": "charity",
+          "subsplit": [{
+              "sibling_split": 0.333,
+              "class": "eff",
+              "name": "EFF"
+          }, {
+              "sibling_split": 0.333,
+              "class": "childsplay",
+              "name": "Child's Play"
+          }, {
+              "sibling_split": 0.333,
+              "class": "watsi",
+              "name": "Watsi"
+          }],
+          "name": "Charity"
+      }],
+      "split": {
+          "default": {
+              "developers": 0.80,
+              "charity": 0.20
+          },
+          "developers": {
+              "developers": 1.0,
+              "charity": 0.0
+          },
+          "charity": {
+              "developers": 0.0,
+              "charity": 1.0
+          }
+      }
+  });
+});
+</script>
+
+<body>
+  <div class="toplevel">
+    <form action="/submit" method="post">
+      <div id="sliders-holder">Loading form...</div>
+    </form>
+  </div>
+</body>
+</html>
+
