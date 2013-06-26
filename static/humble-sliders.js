@@ -238,6 +238,10 @@
       })
       this.text_input = $(this.el).find('.slider-amount');
       var has_children = sub_split_dict.hasOwnProperty('subsplit');
+      if (!has_children) {
+        var name = 'split-' + this.model.get('split_machine_name');
+        $(this.text_input).attr('name', name);
+      }
       if (has_children) {
         var subsplit_holder_template = _.template($("#subsplit-holder-template").html(), {});
         var $subsplit_holder = $($.parseHTML(subsplit_holder_template.trim())).appendTo(this.el);
@@ -464,6 +468,11 @@
       }
       return fatal_error;
     },
+    render: function () {
+      // bound to be called when our model is updated
+      $(this.text_input).val(this.model.get_human_amount());
+      //$(this.el).find('.master-amount').fadeIn();
+    }
   });
 
   // helper functions
