@@ -107,7 +107,7 @@
         // if the distance between the ideal and actual value is
         // greater than or equal to the previous max, then this child
         // becomes the child to use.
-        var distance = Math.abs( actual - ideal );
+        var distance = ( ideal - actual );
         if ( distance >= score ) {
           score = distance;
           to = children[ i ];
