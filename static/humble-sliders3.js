@@ -12,7 +12,10 @@
         'get_human_amount',
         'get_children',
         'add_child',
-        'get_siblings'
+        'get_siblings',
+        'distribute_unused_pennies',
+        'child_to_distribute_to',
+        'propagate_up_from_children'
         );
     },
     get_human_amount: function() {
@@ -47,6 +50,89 @@
         }
       }
       return siblings;
+    },
+    distribute_unused_pennies: function() {
+      // sum my children's pennies.
+      var children_pennies = 0.0;
+      var children = this.get_children();
+      for ( var i = 0; i < children.length; i++ ) {
+        children_pennies += children[ i ].get( 'pennies' );
+      }
+
+      // determine the number of unused pennies.
+      var unused_pennies = ( this.get( 'pennies' ) - children_pennies );
+
+      // distribute each unused penny to my children.
+      {
+        // for each penny...
+        for ( var i = 0; i < unused_pennies; i++ ) {
+          // determine the best child to distribute to.
+          var child = this.child_to_distribute_to();
+
+          // add the penny to that child.
+          child.set( {
+            'pennies': ( child.get( 'pennies' ) + 1 )
+          } );
+        }
+      }
+    },
+    child_to_distribute_to: function() {
+      var pennies = this.get( 'pennies' );
+
+      // for each child...
+      var score = 0.0;
+      var to = null;
+      var children = this.get_children();
+      for ( var i = 0; i < children.length; i++ ) {
+
+        // determine the child's ideal (floating-point) value.
+        var child_percent = children[ i ].get( 'percent' );
+        var ideal = ( child_percent * pennies );
+
+        // determine the child's actual (integer) value.
+        var actual = children[ i ].get( 'pennies' );
+
+        // if the distance between the ideal and actual value is
+        // greater than the previous max, then this child becomes
+        // the child to use.
+        var distance = Math.abs( actual - ideal );
+        if ( distance >= score ) {
+          score = distance;
+          to = children[ i ];
+        }
+      }
+
+      return to;
+    },
+    propagate_up_from_children: function() {
+      // get my parent.
+      var parent_model = this.get( 'parent_model' );
+      if ( parent_model === undefined ) {
+        return;
+      }
+      var parent_children = parent_model.get_children();
+
+      // sum the pennies from myself and all of my siblings.
+      var sum_pennies = 0;
+      for ( var i = 0; i < parent_children.length; i++ ) {
+        sum_pennies += parent_children[ i ].get( 'pennies' );
+      }
+
+      // set my parent's value.
+      parent_model.set( {
+        'pennies': sum_pennies
+      } );
+
+      // recompute percentages.
+      for ( var i = 0; i < parent_children.length; i++ ) {
+        var child_pennies = parent_children[ i ].get( 'pennies' );
+        parent_children[ i ].set( {
+          'percent': ( child_pennies / sum_pennies )
+        } );
+      }
+
+      // continue propagating up the hierarchy.
+      parent_model.propagate_up_from_children();
     }
   } );
 
@@ -116,7 +202,6 @@
     },
     slid: function( event, ui ) {
       event.stopPropagation();
-      console.log('slid');
 
       // get my slider's percent.
       var percent = 0.0;
@@ -131,7 +216,12 @@
 
       // set my new value.
       this.model.set( {
-        'pennies': ( parent_pennies * percent )
+        'pennies': parseInt( parent_pennies * percent )
+      } );
+
+      // recompute my percentage.
+      this.model.set( {
+        'percent': ( this.model.get( 'pennies' ) / parent_pennies )
       } );
 
       // normalize my siblings' percentages, distributing the
@@ -148,6 +238,9 @@
           }
         }
 
+        // determine the leftover value.
+        var leftover = ( parent_pennies - this.model.get( 'pennies' ) );
+
         // for each sibling...
         for ( var i = 0; i < siblings.length; i++ ) {
           var percent = siblings[ i ].get( 'percent' );
@@ -158,12 +251,34 @@
           } else {
             percent /= percent_sum;
           }
+
+          // distribute the leftover value proportional to the
+          // normalized percent.
+          siblings[ i ].set( {
+            'pennies': parseInt( percent * leftover )
+          } );
+
+          // recompute the sibling percentage.
+          siblings[ i ].set( {
+            'percent': ( siblings[ i ].get( 'pennies' ) / parent_pennies )
+          } );
         }
       }
+
+      // distribute unused pennies to siblings.
+      parent_model.distribute_unused_pennies();
     },
     edited: function( event ) {
       event.stopPropagation();
-      console.log('edited');
+
+      // set my new value.
+      var pennies = money2pennies( getTextValue( this.text_input ) );
+      this.model.set( {
+        'pennies': pennies
+      } );
+
+      // propagate changes up the hierarchy.
+      this.model.propagate_up_from_children();
     }
   } );
 
@@ -187,7 +302,6 @@
       }
 
       // for each split...
-
       {
         var holder = $( this.el ).find( '.children-holder' );
         for ( var i = 0; i < this.splits.length; i++ )
@@ -219,7 +333,7 @@
                 'has_children': has_children,
               } ),
               parent_model: this.model,
-              split: this.splits[ i ],
+              params: this.splits[ i ],
               pennies: pennies,
               percent: percent
             } );
@@ -287,6 +401,15 @@
     return replaceHTML( dst, rendered );
   }
 
+  function initPercentSlider( slider_div, value, incrs ) {
+    $( slider_div ).slider( {
+      'min': 0,
+      'max': incrs,
+      'value': ( value * incrs )
+    } );
+    return slider_div;
+  }
+
   function getSliderValue( ui, slider_div ) {
     if ( ui == undefined ) {
       return slider_div.slider( 'option', 'value' );
@@ -295,13 +418,8 @@
     }
   }
 
-  function initPercentSlider( slider_div, value, incrs ) {
-    $( slider_div ).slider( {
-      'min': 0,
-      'max': incrs,
-      'value': ( value * incrs )
-    } );
-    return slider_div;
+  function getTextValue( text_input ) {
+    return $( text_input )[ 0 ].value;
   }
 
 } )( jQuery );
