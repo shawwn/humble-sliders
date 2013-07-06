@@ -9,8 +9,18 @@
 <script src="js/backbone-min.js"></script>
 
 <style type="text/css" media="screen">
+  .slider-toplevel .slider-logo {
+    float: left;
+    width: 130px;
+    height: 21px;
+    padding-left: 35px;
+    line-height: 21px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
   .slider-container {
-    background: url(slider-bg.png) no-repeat;
+    background: url( slider-bg.png ) no-repeat;
     position: relative;
     float: left;
     top: 7px;
@@ -19,7 +29,7 @@
     margin: 0 20px 0 18px;
   }
   .slider-container .right {
-    background: url(slider-bg.png) no-repeat right;
+    background: url( slider-bg.png ) no-repeat right;
     position: absolute;
     top: 0;
     right: -2px;
@@ -30,7 +40,7 @@
     height: 10px;
   }
   .ui-slider-handle {
-    background: url(slider-handle.png) no-repeat;
+    background: url( slider-handle.png ) no-repeat;
     position: absolute;
     top: -3px;
     width: 11px;
@@ -38,17 +48,35 @@
     margin-left: -6px;
     z-index: 10;
   }
-
   .children-holder {
-    margin-left: 20px;
+    margin-left: 40px;
+  }
+  .disclosure-triangle {
+    background: url( disclosure-closed.png ) 0px 0px no-repeat;
+    cursor: pointer;
+    float: left;
+    width: 20px;
+    height: 20px;
+    -o-transition: -o-transform ease-in-out 0.1s;
+    -ms-transition: -ms-transform ease-in-out 0.1s;
+    -moz-transition: -moz-transform ease-in-out 0.1s;
+    -webkit-transition: -webkit-transform ease-in-out 0.1s;
+  }
+  .disclosure-opened {
+    -o-transform: rotate( 90deg );
+    -ms-transform: rotate( 90deg );
+    -moz-transform: rotate( 90deg );
+    -webkit-transform: rotate( 90deg );
+  }
+  .no-transform .disclosure-opened {
+    background: url( disclosure-opened.png ) 0px 0px no-repeat;
   }
 </style>
 
 <script type="text/template" id="sliders-template">
   <div class="sliders-toplevel">
     <div class="master-amount-holder">
-      <input type="text" name="master-amount" class="master-amount"
-      value="<%= initial_value %>" style="display:inline"></input>
+      <input type="text" name="master-amount" class="master-amount" value="<%= initial_value %>" style="display:inline"></input>
     </div>
     <div class="children-holder">
     </div>
@@ -57,6 +85,13 @@
 
 <script type="text/template" id="slider-template">
   <div class="slider-toplevel">
+    <div class="slider-logo">
+      <% if ( has_children ) { %>
+      <div class="disclosure-triangle">
+      </div>
+      <% } %>
+      <div class="slider-name"><%= human_name %></div>
+    </div>
     <div class="slider-container">
       <div class="right"></div>
       <div class="slider-placeholder ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"></div>
@@ -64,8 +99,10 @@
     <div class="pennies-container">
       <input type="text" class="slider-pennies"></input>
     </div>
-    <div class="children-holder">
+    <% if ( has_children ) { %>
+    <div class="children-holder" style="display:none">
     </div>
+    <% } %>
   </div>
 </script>
 
@@ -137,8 +174,10 @@ $( function() {
 
 <body>
   <div class="toplevel">
-    <div id="sliders-holder">
-    </div>
+    <form action="/submit">
+      <div id="sliders-holder"></div>
+      <input type="submit"></input>
+    </form>
   </div>
 </body>
 </html>

@@ -181,13 +181,15 @@
       'mousedown .ui-slider': 'slid',
       'slide': 'slid',
       'slidestop': 'slid',
-      'change': 'edited'
+      'change': 'edited',
+      'click .disclosure-triangle': 'toggle_children'
     },
     initialize: function() {
       _.bindAll( this,
         'render',
         'slid',
-        'edited'
+        'edited',
+        'toggle_children'
         );
       this.params = this.options[ 'params' ];
       this.model = this.options[ 'model' ];
@@ -196,8 +198,14 @@
       this.slider_div = $( this.el ).find( '.slider-placeholder' );
       initPercentSlider( this.slider_div, this.increments );
 
-      // initialize my text field.
-      this.text_input = $( this.el ).find( '.slider-pennies' );
+      // initialize my text input.
+      {
+        this.text_input = $( this.el ).find( '.slider-pennies' );
+
+        // set text input name.
+        var name = ( 'amount-' + this.model.get( 'machine_name' ) );
+        $( this.text_input ).attr( 'name', name );
+      }
 
       // respond to changes in my model.
       this.model.on( 'change:pennies', this.render );
@@ -284,6 +292,27 @@
     },
     edited: function( event ) {
       onEdited( this, event );
+    },
+    toggle_children: function( event ) {
+      event.stopPropagation();
+
+      // determine whether I was previously open.
+      var was_open = $( event.target ).hasClass( 'disclosure-opened' );
+
+      // get my children's container.
+      var children_el;
+      {
+        var parent_el = $( event.target ).closest( '.slider-toplevel' );
+        children_el = parent_el.find( '.children-holder' );
+      }
+
+      // toggle my children's container.
+      if ( was_open ) {
+        children_el.slideUp( 200 );
+      } else {
+        children_el.slideDown( 200 );
+      }
+      $( event.target ).toggleClass( 'disclosure-opened' );
     },
   } );
 
@@ -378,6 +407,7 @@
     for ( var i = 0; i < splits.length; i++ ) {
       var human_name = splits[ i ][ 'name' ];
       var machine_name = splits[ i ][ 'class' ];
+      var has_children = ( splits[ i ][ 'splits' ] !== undefined );
 
       // determine the child's percentage.
       var child_percent = calcChildPercent( allotments, splits, i );
@@ -392,13 +422,16 @@
       var child_model = new SliderModel( {
         'pennies': child_pennies,
         'percent': child_percent,
-        'parent_model': parent_model
+        'parent_model': parent_model,
+        'machine_name': machine_name
       } );
       parent_model.add_child( child_model );
 
 
       // add the child's template.
       var template_el = templateAppend( children_el, '#slider-template', {
+        'has_children': has_children,
+        'human_name': human_name
       } );
 
       // create a view for the child.
