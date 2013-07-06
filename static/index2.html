@@ -1,0 +1,166 @@
+<html>
+<link href="css/no-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.js"></script>
+<script src="js/json2.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/backbone-min.js"></script>
+
+<style type="text/css" media="screen">
+.slider-container {
+  height: 6px;
+  position: relative;
+  background: url(slider-bg.png) no-repeat;
+  width: 292px;
+  float: left;
+  margin: 0 20px 0 18px;
+  top: 7px;
+}
+
+.slider-container .right {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: url(slider-bg.png) no-repeat right;
+}
+.ui-slider {
+  height: 10px;
+}
+
+.ui-slider-handle {
+  background: url(slider-handle.png) no-repeat;
+  height: 12px;
+  width: 11px;
+  position: absolute;
+  margin-left: -6px;
+  z-index: 10;
+  top: -3px;
+}
+
+</style>
+
+<style type="text/template" id="sliders-template">
+  <div class="humble-sliders">
+    <div class="master-amount-holder">
+      <input name="master-amount" class="master-amount" type="text"
+      value="<%= initial_value %>" style="display:inline"></input>
+    </div>
+    <div class="splits-holder">
+    </div>
+  </div>
+</style>
+
+<style type="text/template" id="subsplit-holder-template">
+  <div class="subsplit">
+    <div class="subsplit-hider" style="display:inline">
+      <div class='subsplit-wrapper'></div>
+    </div>
+  </div>
+</style>
+
+<style type="text/template" id="slider-template">
+  <div class="slider-toplevel">
+    <div class="slider-container">
+      <div class="right"></div>
+      <div class="slider-placeholder ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all">
+      </div>
+    </div>
+    <div class="pennies-container">
+      <input type="text" class="slider-pennies">
+      </input>
+    </div>
+  </div>
+</style>
+
+<script src="humble-sliders2.js"></script>
+
+<script type="text/javascript">
+$(function() {
+    window.dbg1 = humbleSliders( 2000, $( "#sliders-holder" ), {
+      /*
+        "order": [ {
+          "class": "developers",
+          "name": "Developers"
+          }, {
+          "class": "charity",
+          "name": "Charity"
+          } ],
+        "split": {
+          "default": {
+            "developers": 0.80,
+            "charity": 0.20
+          }
+        }
+        */
+      "order": [{
+          "class": "developers",
+          "subsplit": [{
+              "sibling_split": 0.16666600000000001,
+              "class": "company1",
+              "name": "Product 1"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company2",
+              "name": "Product 2"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company3",
+              "name": "Product 3"
+          }, {
+              "sibling_split": 0.16666600000000001,
+              "class": "company4",
+              "name": "Product 4"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company5",
+              "name": "Product 5"
+          }, {
+              "sibling_split": 0.16666700000000001,
+              "class": "company6",
+              "name": "Product 6",
+          }],
+          "name": "Developers"
+      }, {
+          "class": "charity",
+          "subsplit": [{
+              "sibling_split": 0.333,
+              "class": "eff",
+              "name": "EFF"
+          }, {
+              "sibling_split": 0.333,
+              "class": "childsplay",
+              "name": "Child's Play"
+          }, {
+              "sibling_split": 0.333,
+              "class": "watsi",
+              "name": "Watsi"
+          }],
+          "name": "Charity"
+      }],
+      "split": {
+          "default": {
+              "developers": 0.80,
+              "charity": 0.20
+          },
+          "developers": {
+              "developers": 1.0,
+              "charity": 0.0
+          },
+          "charity": {
+              "developers": 0.0,
+              "charity": 1.0
+          }
+      }
+      } );
+});
+</script>
+
+<body>
+  <div class="toplevel">
+    <div id="sliders-holder">
+    </div>
+  </div>
+</body>
+</html>
