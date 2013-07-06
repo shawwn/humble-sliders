@@ -280,34 +280,61 @@
       parent_model.distribute_unused_pennies();
     },
     edited: function( event ) {
-      event.stopPropagation();
-      
-      // parse my new value from the text input.
-      var pennies = money2pennies( getTextInput( this.text_input ) );
-
-      // set my new value.
-      this.model.set( {
-        'pennies': pennies
-      } );
-
-      // propagate the change up my hierarchy.
-      this.model.propagate_up_from_children();
-
-      // re-render ourselves, to correct any editing typos.
-      this.render();
+      onEdited( this, event );
     },
   } );
 
-  var SlidersView = Backbone.View.extend( {
+  var SlidersToplevelView = Backbone.View.extend( {
+    text_input: null,
+    events: {
+      'change': 'edited'
+    },
     initialize: function() {
+      _.bindAll( this,
+        'render',
+        'edited'
+        );
       this.params = this.options[ 'params' ];
       this.model = this.options[ 'model' ];
+
+      // initialize my text field.
+      this.text_input = $( this.el ).find( '.master-amount' );
+
+      // respond to changes in my model.
+      this.model.on( 'change:pennies', this.render );
 
       // make my children.
       var pennies = this.model.get( 'pennies' );
       makeChildrenFromParams( this.model, pennies, this.el, this.params );
-    }
+
+      this.render();
+    },
+    render: function() {
+      // render my text field's value as my model's amount.
+      setTextInput( this.text_input, this.model.get_human_amount() );
+    },
+    edited: function( event ) {
+      onEdited( this, event );
+    },
   } );
+
+  function onEdited( me, event ) {
+    event.stopPropagation();
+    
+    // parse my new value from the text input.
+    var pennies = money2pennies( getTextInput( me.text_input ) );
+
+    // set my new value.
+    me.model.set( {
+      'pennies': pennies
+    } );
+
+    // propagate the change up my hierarchy.
+    me.model.propagate_up_from_children();
+
+    // re-render ourselves, to correct any editing typos.
+    me.render();
+  }
 
   function calcChildPercent( allotments, splits, i ) {
     var child_percent = splits[ i ][ 'percent' ];
@@ -395,7 +422,7 @@
     } );
 
     // make the toplevel view.
-    return new SlidersView( {
+    return new SlidersToplevelView( {
       el: template_el,
       params: params,
       model: model
