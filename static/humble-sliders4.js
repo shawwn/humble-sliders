@@ -128,12 +128,14 @@
       }
 
       // recompute each child's percentage.
-      for ( var i = 0; i < parent_children.length; i++ ) {
-        var child_pennies = parent_children[ i ].get( 'pennies' );
+      if ( parent_pennies > 0 ) {
+        for ( var i = 0; i < parent_children.length; i++ ) {
+          var child_pennies = parent_children[ i ].get( 'pennies' );
 
-        parent_children[ i ].set( {
-          'percent': ( child_pennies / parent_pennies )
-        } );
+          parent_children[ i ].set( {
+            'percent': ( child_pennies / parent_pennies )
+          } );
+        }
       }
 
       // propagate the change up my hierarchy.
@@ -232,11 +234,11 @@
 
       // recompute my percentage.
       this.model.set( {
-        'percent': ( this.model.get( 'pennies' ) / parent_pennies )
+        'percent': percent
       } );
 
       // normalize my siblings' percentages, distributing the
-      // leftover value based on the nomalized weights.
+      // leftover based on the nomalized percentages.
       {
         // get my siblings.
         var siblings = this.model.get_siblings();
@@ -250,7 +252,7 @@
         }
 
         // determine the leftover value.
-        var leftover = ( parent_pennies - this.model.get( 'pennies' ) );
+        var leftover = ( 1.0 - percent );
 
         // for each sibling...
         for ( var i = 0; i < siblings.length; i++ ) {
@@ -263,15 +265,16 @@
             percent /= percent_sum;
           }
 
-          // distribute the leftover value proportional to the
+          // distribute the leftover proportional to the
           // normalized percent.
           siblings[ i ].set( {
-            'pennies': parseInt( percent * leftover )
+            'percent': ( percent * leftover )
           } );
 
-          // recompute the sibling percentage.
+          // recompute the sibling value.
+          var sibling_percent = siblings[ i ].get( 'percent' );
           siblings[ i ].set( {
-            'percent': ( siblings[ i ].get( 'pennies' ) / parent_pennies )
+            'pennies': parseInt( sibling_percent * parent_pennies )
           } );
         }
       }
