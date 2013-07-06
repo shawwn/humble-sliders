@@ -17,6 +17,7 @@
         'child_to_distribute_to',
         'propagate_up_from_children'
         );
+      this.set( { 'children': [] } );
     },
     get_human_amount: function() {
       return pennies2money( this.get( 'pennies' ) );

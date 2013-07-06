@@ -1,0 +1,145 @@
+<html>
+
+<link href="css/no-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet" />
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.js"></script>
+<script src="js/json2.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/backbone-min.js"></script>
+
+<style type="text/css" media="screen">
+  .slider-container {
+    background: url(slider-bg.png) no-repeat;
+    position: relative;
+    float: left;
+    top: 7px;
+    width: 292px;
+    height: 6px;
+    margin: 0 20px 0 18px;
+  }
+  .slider-container .right {
+    background: url(slider-bg.png) no-repeat right;
+    position: absolute;
+    top: 0;
+    right: -2px;
+    bottom: 0;
+    width: 2px;
+  }
+  .ui-slider {
+    height: 10px;
+  }
+  .ui-slider-handle {
+    background: url(slider-handle.png) no-repeat;
+    position: absolute;
+    top: -3px;
+    width: 11px;
+    height: 12px;
+    margin-left: -6px;
+    z-index: 10;
+  }
+
+  .children-holder {
+    margin-left: 20px;
+  }
+</style>
+
+<script type="text/template" id="sliders-template">
+  <div class="sliders-toplevel">
+    <div class="master-amount-holder">
+      <input type="text" name="master-amount" class="master-amount"
+      value="<%= initial_value %>" style="display:inline"></input>
+    </div>
+    <div class="children-holder">
+    </div>
+  </div>
+</script>
+
+<script type="text/template" id="slider-template">
+  <div class="slider-toplevel">
+    <div class="slider-container">
+      <div class="right"></div>
+      <div class="slider-placeholder ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"></div>
+    </div>
+    <div class="pennies-container">
+      <input type="text" class="slider-pennies"></input>
+    </div>
+    <div class="children-holder">
+    </div>
+  </div>
+</script>
+
+<script src="humble-sliders4.js"></script>
+
+<script type="text/javascript">
+$( function() {
+    window.dbg1 = humbleSliders( 4000, $( "#sliders-holder" ), {
+      "splits": [ {
+          "class": "developers",
+          "name": "Developers",
+          "splits": [ {
+              "class": "dev1",
+              "name": "Developer #1",
+              "percent": 1.0
+            }, {
+              "class": "dev2",
+              "name": "Developer #2",
+              "percent": ( 1.0 / 5.0 )
+            }, {
+              "class": "dev3",
+              "name": "Developer #3",
+              "percent": ( 1.0 / 5.0 )
+            }, {
+              "class": "dev4",
+              "name": "Developer #4",
+              "percent": ( 1.0 / 5.0 )
+            }, {
+              "class": "dev5",
+              "name": "Developer #5",
+              "percent": ( 1.0 / 5.0 )
+            } ]
+        }, {
+          "class": "charity",
+          "name": "Charity",
+          "splits": [ {
+              "class": "charity1",
+              "name": "Charity #1",
+              "percent": ( 1.0 / 2.0 )
+            }, {
+              "class": "charity2",
+              "name": "Charity #2",
+              "percent": ( 1.0 / 2.0 )
+            } ]
+        }, {
+          "class": "other",
+          "name": "Other"
+      } ],
+      "allotments": {
+        "default": {
+          "developers": 0.75,
+          "charity": 0.15,
+          "other": 0.10
+        },
+        "developers": {
+          "developers": 1.00,
+          "charity": 0.00,
+          "other": 0.00
+        },
+        "charity": {
+          "developers": 0.00,
+          "charity": 1.00,
+          "other": 0.00
+        }
+      }
+    } );
+} );
+</script>
+
+<body>
+  <div class="toplevel">
+    <div id="sliders-holder">
+    </div>
+  </div>
+</body>
+</html>
+
+
